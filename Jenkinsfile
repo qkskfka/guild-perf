@@ -24,7 +24,7 @@ pipeline {
                 perfReport sourceDataFiles: 'reports/duration.jtl', errorFailedThreshold: 5, errorUnstableThreshold: 1
               
                 }
-            }
+            
         }
     }
     post {
