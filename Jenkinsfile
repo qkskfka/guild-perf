@@ -10,21 +10,25 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                deleteDir()
                 checkout scm
             }
         }
         stage('Smoke Test') {
             steps {
-                bat '%JMETER_HOME%\\bin\\jmeter.bat -n  -t perf/smoke.jmx -l reports/smoke.jtl -e -o html-report -Jthreads=%THREADS% -Jloops=%LOOPS%'
+                bat '%JMETER_HOME%\bin\jmeter.bat -n -t perf/smoke.jmx -l reports/smoke.jtl -e -o html-report -Jthreads=%THREADS% -Jloops=%LOOPS%'
             }
         }
         stage('Response Time Test') {
             steps {
-                bat '%JMETER_HOME%\\bin\\jmeter.bat -n -f -t perf/duration.jmx -l reports/duration.jtl'
+                bat '%JMETER_HOME%\bin\jmeter.bat -n -t perf/duration.jmx -l reports/duration.jtl'
                 perfReport sourceDataFiles: 'reports/duration.jtl', errorFailedThreshold: 5, errorUnstableThreshold: 1
-              
+                script {
+                    if (currentBuild.currentResult == 'FAILURE') {
+                        error('응답 시간 기준 미달: 에러율 5% 이상')
+                    }
                 }
-            
+            }
         }
     }
     post {
